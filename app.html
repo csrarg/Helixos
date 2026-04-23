@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELIX OS — AI Command Center for Modern Business</title>
+<meta name="description" content="The AI-powered command center that turns your business into a self-operating system. Agents that work while you sleep.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060e;
+  --bg2:#080a16;
+  --panel:rgba(10,13,28,0.85);
+  --b1:rgba(99,179,255,0.12);
+  --b2:rgba(99,179,255,0.28);
+  --c1:#63b3ff;
+  --c2:#a78bfa;
+  --c3:#00f5c4;
+  --text:#e8f0ff;
+  --dim:rgba(232,240,255,0.45);
+  --dim2:rgba(232,240,255,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;overflow-x:hidden;}
+
+/* ── CANVAS ── */
+#c{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid transparent;transition:all .4s;backdrop-filter:blur(0px);}
+nav.scrolled{background:rgba(5,6,14,.9);border-bottom-color:var(--b1);backdrop-filter:blur(16px);}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:5px;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{color:var(--dim);font-size:13px;text-decoration:none;letter-spacing:.5px;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{padding:9px 22px;background:linear-gradient(135deg,var(--c1),var(--c2));border-radius:8px;color:#000!important;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;transition:all .2s!important;}
+.nav-cta:hover{transform:scale(1.04);box-shadow:0 0 20px rgba(99,179,255,.4);}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:1;}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;}
+.hero-inner{max-width:860px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid var(--b2);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c1);margin-bottom:32px;background:rgba(99,179,255,.06);animation:fadeUp .8s ease both;}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--c3);box-shadow:0 0 8px var(--c3);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(40px,7vw,84px);line-height:1.05;letter-spacing:-1px;margin-bottom:24px;animation:fadeUp .8s .1s ease both;}
+.h1-line2{background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--dim);line-height:1.7;max-width:580px;margin:0 auto 40px;font-weight:300;animation:fadeUp .8s .2s ease both;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s .3s ease both;}
+.btn-primary{padding:16px 36px;background:linear-gradient(135deg,var(--c1),var(--c2));border:none;border-radius:10px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .25s;text-decoration:none;display:inline-block;}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 8px 32px rgba(99,179,255,.4);}
+.btn-ghost{padding:16px 36px;border:1px solid var(--b2);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-weight:600;font-size:14px;letter-spacing:1px;cursor:pointer;transition:all .25s;text-decoration:none;display:inline-block;background:transparent;}
+.btn-ghost:hover{border-color:var(--c1);color:var(--c1);background:rgba(99,179,255,.06);}
+.hero-stats{display:flex;gap:48px;justify-content:center;margin-top:64px;flex-wrap:wrap;animation:fadeUp .8s .4s ease both;}
+.h-stat{text-align:center;}
+.h-stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:36px;background:linear-gradient(135deg,var(--c1),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.h-stat-label{font-size:12px;color:var(--dim);letter-spacing:1px;margin-top:2px;}
+
+/* ── SCROLL INDICATOR ── */
+.scroll-ind{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--dim2);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;animation:fadeUp .8s .8s ease both;}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--b2),transparent);animation:scrollPulse 2s infinite;}
+@keyframes scrollPulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── DASHBOARD PREVIEW ── */
+#preview{padding:80px 24px;text-align:center;}
+.preview-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--c1);margin-bottom:16px;}
+.preview-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(28px,4vw,42px);margin-bottom:48px;}
+.preview-wrap{max-width:1000px;margin:0 auto;position:relative;}
+.preview-glow{position:absolute;inset:-40px;background:radial-gradient(ellipse,rgba(99,179,255,.1) 0%,transparent 70%);pointer-events:none;}
+.preview-frame{border:1px solid var(--b2);border-radius:16px;overflow:hidden;background:var(--bg2);box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 60px rgba(99,179,255,.08);position:relative;}
+.pf-bar{height:36px;background:rgba(5,6,14,.95);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 16px;gap:8px;}
+.pf-dot{width:10px;height:10px;border-radius:50%;}
+.pf-url{margin-left:12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim2);flex:1;text-align:center;}
+.pf-content{padding:20px;display:grid;grid-template-columns:44px 1fr 200px;gap:8px;min-height:320px;}
+.pf-sidebar{background:rgba(99,179,255,.04);border-radius:8px;border:1px solid var(--b1);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:6px;}
+.pf-sb-icon{width:28px;height:28px;border-radius:7px;background:rgba(99,179,255,.08);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.pf-sb-icon.active{background:rgba(99,179,255,.18);border:1px solid var(--b2);}
+.pf-main{display:flex;flex-direction:column;gap:8px;}
+.pf-rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:1;}
+.pf-room{background:rgba(99,179,255,.04);border:1px solid var(--b1);border-radius:8px;padding:10px;position:relative;overflow:hidden;}
+.pf-room::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 120%,var(--rc,.05) 0%,transparent 70%);pointer-events:none;}
+.pf-room-name{font-family:'Syne',sans-serif;font-size:8px;letter-spacing:2px;font-weight:700;margin-bottom:4px;}
+.pf-room-icon{font-size:18px;margin-bottom:4px;}
+.pf-room-stat{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);}
+.pf-agents{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.pf-agent{background:rgba(99,179,255,.04);border:1px solid var(--b1);border-radius:7px;padding:7px 4px;text-align:center;}
+.pf-agent-av{width:22px;height:22px;border-radius:50%;margin:0 auto 3px;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid var(--b2);}
+.pf-agent-av.working{border-color:#ff7849;box-shadow:0 0 6px rgba(255,120,73,.4);animation:agSpin 2s linear infinite;}
+.pf-agent-av.thinking{border-color:#a78bfa;animation:agPulse 1s infinite;}
+@keyframes agSpin{from{box-shadow:0 0 0 0 rgba(255,120,73,.5)}to{box-shadow:0 0 10px 3px rgba(255,120,73,0)}}
+@keyframes agPulse{0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.6)}50%{box-shadow:0 0 0 6px rgba(167,139,250,0)}}
+.pf-agent-name{font-family:'Syne',sans-serif;font-size:7px;color:var(--c1);font-weight:700;}
+.pf-agent-status{font-size:6px;color:var(--dim);}
+.pf-right{display:flex;flex-direction:column;gap:7px;}
+.pf-widget{background:rgba(99,179,255,.04);border:1px solid var(--b1);border-radius:8px;padding:10px;}
+.pf-w-label{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--dim);letter-spacing:2px;margin-bottom:6px;}
+.pf-bars{display:flex;align-items:flex-end;gap:2px;height:36px;}
+.pf-bar2{flex:1;border-radius:1px 1px 0 0;}
+.pf-comm{font-size:8px;color:var(--dim);line-height:1.5;}
+.pf-comm b{font-family:'Syne',sans-serif;font-size:7px;}
+
+/* ── FEATURES ── */
+#features{padding:100px 24px;}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--c1);text-align:center;margin-bottom:12px;}
+.section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(28px,4vw,46px);text-align:center;margin-bottom:8px;}
+.section-sub{font-size:16px;color:var(--dim);text-align:center;max-width:500px;margin:0 auto 64px;line-height:1.6;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1100px;margin:0 auto;}
+.feat-card{background:var(--panel);border:1px solid var(--b1);border-radius:16px;padding:28px;transition:all .3s;position:relative;overflow:hidden;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--fc,var(--c1)),transparent);opacity:0;transition:opacity .3s;}
+.feat-card:hover{border-color:var(--b2);transform:translateY(-4px);}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{font-size:32px;margin-bottom:16px;}
+.feat-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:8px;}
+.feat-desc{font-size:13px;color:var(--dim);line-height:1.7;}
+.feat-tag{display:inline-block;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 10px;border-radius:4px;background:rgba(99,179,255,.08);color:var(--c1);}
+
+/* ── HOW IT WORKS ── */
+#how{padding:100px 24px;background:linear-gradient(180deg,transparent,rgba(99,179,255,.03),transparent);}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1000px;margin:0 auto;position:relative;}
+.steps::before{content:'';position:absolute;top:28px;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,var(--b2),var(--b2),transparent);}
+.step{text-align:center;padding:0 20px;}
+.step-num{width:56px;height:56px;border-radius:50%;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--c1);background:var(--bg2);position:relative;z-index:1;}
+.step-num::after{content:'';position:absolute;inset:-4px;border-radius:50%;background:radial-gradient(circle,rgba(99,179,255,.15),transparent);pointer-events:none;}
+.step-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px;}
+.step-desc{font-size:12px;color:var(--dim);line-height:1.6;}
+
+/* ── PRICING ── */
+#pricing{padding:100px 24px;}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:960px;margin:0 auto;}
+.price-card{background:var(--panel);border:1px solid var(--b1);border-radius:20px;padding:32px;transition:all .3s;position:relative;overflow:hidden;}
+.price-card.featured{border-color:var(--c1);background:rgba(99,179,255,.04);}
+.price-card.featured::before{content:'MOST POPULAR';position:absolute;top:0;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;color:#000;background:linear-gradient(90deg,var(--c1),var(--c2));padding:4px 18px;border-radius:0 0 10px 10px;}
+.price-card:hover{transform:translateY(-4px);border-color:var(--b2);}
+.price-card.featured:hover{transform:translateY(-4px);}
+.plan-name{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:4px;color:var(--c1);margin-bottom:8px;}
+.plan-price{font-family:'Syne',sans-serif;font-weight:800;font-size:48px;line-height:1;margin:16px 0 4px;}
+.plan-price span{font-size:18px;color:var(--dim);font-weight:400;}
+.plan-period{font-size:12px;color:var(--dim);margin-bottom:24px;}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.plan-features li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--dim);}
+.plan-features li::before{content:'✓';color:var(--c3);font-weight:700;flex-shrink:0;margin-top:1px;}
+.plan-features li.off{opacity:.4;}
+.plan-features li.off::before{content:'×';color:var(--dim);}
+.plan-btn{width:100%;padding:14px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:2px;cursor:pointer;transition:all .25s;border:none;}
+.plan-btn.primary{background:linear-gradient(135deg,var(--c1),var(--c2));color:#000;}
+.plan-btn.ghost{background:transparent;border:1px solid var(--b2);color:var(--text);}
+.plan-btn:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(99,179,255,.25);}
+
+/* ── INTEGRATIONS STRIP ── */
+#integrations-strip{padding:80px 24px;overflow:hidden;}
+.int-scroll{display:flex;gap:16px;animation:scroll 30s linear infinite;width:max-content;}
+.int-scroll:hover{animation-play-state:paused;}
+.int-pill{display:flex;align-items:center;gap:10px;padding:12px 20px;border:1px solid var(--b1);border-radius:100px;white-space:nowrap;font-size:13px;background:var(--panel);transition:border-color .2s;}
+.int-pill:hover{border-color:var(--b2);}
+.int-pill-icon{font-size:18px;}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── TESTIMONIALS ── */
+#testimonials{padding:100px 24px;}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto;}
+.testi-card{background:var(--panel);border:1px solid var(--b1);border-radius:16px;padding:24px;transition:all .3s;}
+.testi-card:hover{border-color:var(--b2);transform:translateY(-3px);}
+.testi-stars{color:#fbbf24;font-size:14px;margin-bottom:14px;letter-spacing:2px;}
+.testi-text{font-size:14px;color:var(--dim);line-height:1.7;margin-bottom:18px;font-style:italic;}
+.testi-author{display:flex;align-items:center;gap:10px;}
+.testi-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(99,179,255,.1);border:1px solid var(--b1);}
+.testi-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
+.testi-role{font-size:11px;color:var(--dim);}
+
+/* ── CTA ── */
+#cta{padding:120px 24px;text-align:center;}
+.cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(99,179,255,.08),transparent 70%);pointer-events:none;}
+.cta-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(32px,5vw,64px);line-height:1.1;margin-bottom:16px;}
+.cta-sub{font-size:18px;color:var(--dim);margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto;}
+.cta-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim2);margin-top:16px;letter-spacing:1px;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--b1);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:5px;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-size:12px;color:var(--dim);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--text);}
+.footer-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim2);}
+
+/* ── STRIPE MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg2);border:1px solid var(--b2);border-radius:20px;padding:36px;width:460px;max-width:95vw;box-shadow:0 40px 100px rgba(0,0,0,.9),0 0 60px rgba(99,179,255,.1);animation:modalUp .3s ease;}
+@keyframes modalUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-close{float:right;cursor:pointer;color:var(--dim);font-size:20px;line-height:1;transition:color .2s;}
+.modal-close:hover{color:var(--text);}
+.modal-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:4px;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.modal-plan{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1);letter-spacing:2px;margin-bottom:24px;}
+.modal-price{font-family:'Syne',sans-serif;font-weight:800;font-size:42px;color:var(--text);margin-bottom:4px;}
+.modal-price span{font-size:16px;color:var(--dim);font-weight:400;}
+.modal-period{font-size:12px;color:var(--dim);margin-bottom:24px;}
+.modal-field{margin-bottom:14px;}
+.modal-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:5px;text-transform:uppercase;}
+.modal-input{width:100%;background:rgba(99,179,255,.05);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.modal-input:focus{border-color:var(--c1);}
+.modal-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-submit{width:100%;padding:16px;background:linear-gradient(135deg,var(--c1),var(--c2));border:none;border-radius:10px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .25s;margin-top:8px;}
+.modal-submit:hover{transform:scale(1.02);box-shadow:0 8px 32px rgba(99,179,255,.4);}
+.modal-secure{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim2);}
+.modal-note{font-size:11px;color:var(--dim);text-align:center;margin-top:8px;line-height:1.5;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(24px);transition:all .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .nav-links{display:none;}
+  .features-grid,.pricing-grid,.testi-grid{grid-template-columns:1fr;}
+  .steps{grid-template-columns:1fr 1fr;}
+  .steps::before{display:none;}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:24px;}
+  .pf-content{grid-template-columns:1fr;}
+  .pf-sidebar,.pf-right{display:none;}
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">HELIX OS</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" onclick="openModal('growth')">Start free</a>
+    <a href="#pricing" class="nav-cta">GET ACCESS</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><div class="hero-badge-dot"></div> NOW LIVE — AI COMMAND CENTER V2</div>
+    <h1>Your business,<br><span class="h1-line2">run by AI agents.</span></h1>
+    <p class="hero-sub">HELIX OS turns your operations into a self-running system. AI agents that research, build, sell, and report — while you focus on what matters.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary" onclick="openModal('growth')">⚡ START YOUR OS</a>
+      <a href="#preview" class="btn-ghost">SEE DEMO →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="h-stat"><div class="h-stat-num">10+</div><div class="h-stat-label">AI AGENTS</div></div>
+      <div class="h-stat"><div class="h-stat-num">16+</div><div class="h-stat-label">INTEGRATIONS</div></div>
+      <div class="h-stat"><div class="h-stat-num">3×</div><div class="h-stat-label">FASTER GROWTH</div></div>
+      <div class="h-stat"><div class="h-stat-num">24/7</div><div class="h-stat-label">ALWAYS ON</div></div>
+    </div>
+  </div>
+  <div class="scroll-ind"><div class="scroll-line"></div>SCROLL</div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section id="preview">
+  <div class="preview-label">LIVE DASHBOARD</div>
+  <h2 class="preview-title reveal">Your command center. <span style="background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Fully yours.</span></h2>
+  <div class="preview-wrap reveal">
+    <div class="preview-glow"></div>
+    <div class="preview-frame">
+      <div class="pf-bar">
+        <div class="pf-dot" style="background:#ff5f57"></div>
+        <div class="pf-dot" style="background:#febc2e"></div>
+        <div class="pf-dot" style="background:#28c840"></div>
+        <div class="pf-url">app.helixos.ai/dashboard</div>
+      </div>
+      <div class="pf-content">
+        <div class="pf-sidebar">
+          <div class="pf-sb-icon active">🗺</div>
+          <div class="pf-sb-icon">🎯</div>
+          <div class="pf-sb-icon">🔌</div>
+          <div class="pf-sb-icon">⚡</div>
+          <div class="pf-sb-icon">💬</div>
+        </div>
+        <div class="pf-main">
+          <div class="pf-rooms">
+            <div class="pf-room" style="--rc:rgba(99,179,255,.08)"><div class="pf-room-name" style="color:#63b3ff">STOREFRONT</div><div class="pf-room-icon">🛒</div><div class="pf-room-stat">32 products live</div></div>
+            <div class="pf-room" style="--rc:rgba(255,120,73,.08)"><div class="pf-room-name" style="color:#ff7849">FACTORY</div><div class="pf-room-icon">⚙️</div><div class="pf-room-stat">12 in production</div></div>
+            <div class="pf-room" style="--rc:rgba(167,139,250,.08)"><div class="pf-room-name" style="color:#a78bfa">MEDIA BAY</div><div class="pf-room-icon">🎨</div><div class="pf-room-stat">88 assets</div></div>
+            <div class="pf-room" style="--rc:rgba(251,191,36,.08)"><div class="pf-room-name" style="color:#fbbf24">AD CENTER</div><div class="pf-room-icon">📣</div><div class="pf-room-stat">3 campaigns</div></div>
+            <div class="pf-room" style="--rc:rgba(52,211,153,.08)"><div class="pf-room-name" style="color:#34d399">TREASURY</div><div class="pf-room-icon">💰</div><div class="pf-room-stat">$4,218 revenue</div></div>
+            <div class="pf-room" style="--rc:rgba(0,245,196,.08)"><div class="pf-room-name" style="color:#00f5c4">RESEARCH</div><div class="pf-room-icon">🔬</div><div class="pf-room-stat">14 trends</div></div>
+          </div>
+          <div class="pf-agents">
+            <div class="pf-agent"><div class="pf-agent-av working">🔬</div><div class="pf-agent-name">NOVA</div><div class="pf-agent-status" style="color:#ff7849">● WORKING</div></div>
+            <div class="pf-agent"><div class="pf-agent-av thinking">⚙️</div><div class="pf-agent-name">FORGE</div><div class="pf-agent-status" style="color:#a78bfa">◌ THINKING</div></div>
+            <div class="pf-agent"><div class="pf-agent-av working">🎨</div><div class="pf-agent-name">PIXEL</div><div class="pf-agent-status" style="color:#ff7849">● WORKING</div></div>
+            <div class="pf-agent"><div class="pf-agent-av">🗺️</div><div class="pf-agent-name">ATLAS</div><div class="pf-agent-status" style="color:#34d399">✓ DONE</div></div>
+          </div>
+        </div>
+        <div class="pf-right">
+          <div class="pf-widget">
+            <div class="pf-w-label">REVENUE · 7D</div>
+            <div class="pf-bars">
+              <div class="pf-bar2" style="height:20%;background:#1e2d4a"></div>
+              <div class="pf-bar2" style="height:45%;background:#1e3a5c"></div>
+              <div class="pf-bar2" style="height:30%;background:#1e2d4a"></div>
+              <div class="pf-bar2" style="height:70%;background:#2a4a7a"></div>
+              <div class="pf-bar2" style="height:55%;background:#1e3a5c"></div>
+              <div class="pf-bar2" style="height:82%;background:#3a6aaa"></div>
+              <div class="pf-bar2" style="height:100%;background:#63b3ff;box-shadow:0 0 6px #63b3ff"></div>
+            </div>
+          </div>
+          <div class="pf-widget" style="flex:1">
+            <div class="pf-w-label">SHIP COMMS</div>
+            <div class="pf-comm" style="margin-bottom:5px;"><b style="color:#00f5c4">NOVA</b> Found 3 trending niches 🌱</div>
+            <div class="pf-comm" style="margin-bottom:5px;"><b style="color:#ff7849">FORGE</b> 8 products optimized ✓</div>
+            <div class="pf-comm"><b style="color:#a78bfa">ATLAS</b> Push mugs now 🔥</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">WHAT'S INSIDE</div>
+  <h2 class="section-title reveal">Everything your business needs.<br>Nothing it doesn't.</h2>
+  <p class="section-sub reveal">Built for ecommerce, SaaS, agencies, logistics, and any business that wants to move faster.</p>
+  <div class="features-grid">
+    <div class="feat-card reveal" style="--fc:#63b3ff">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-title">Animated AI Agents</div>
+      <div class="feat-desc">10 specialized agents with unique personalities. Watch them think, work, and complete tasks in real time — with live status animations.</div>
+      <div class="feat-tag">Nova · Forge · Atlas · Cipher + more</div>
+    </div>
+    <div class="feat-card reveal" style="--fc:#a78bfa">
+      <div class="feat-icon">🗺️</div>
+      <div class="feat-title">Visual Command Map</div>
+      <div class="feat-desc">See your entire business at a glance. Clickable rooms for every department — Factory, Treasury, Media Bay, Research and more.</div>
+      <div class="feat-tag">9 department rooms</div>
+    </div>
+    <div class="feat-card reveal" style="--fc:#00f5c4">
+      <div class="feat-icon">🔌</div>
+      <div class="feat-title">16+ Integrations</div>
+      <div class="feat-desc">Connect Shopify, Meta Ads, HubSpot, Stripe, Gmail, Notion, WhatsApp and more. Agents automatically use your live data.</div>
+      <div class="feat-tag">OAuth · 1-click connect</div>
+    </div>
+    <div class="feat-card reveal" style="--fc:#ff7849">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Token Cost Calculator</div>
+      <div class="feat-desc">See the exact AI cost of every task before running it. Full transparency — input tokens, output tokens, model, estimated time.</div>
+      <div class="feat-tag">Real-time pricing</div>
+    </div>
+    <div class="feat-card reveal" style="--fc:#fbbf24">
+      <div class="feat-icon">🎯</div>
+      <div class="feat-title">Gamified Missions</div>
+      <div class="feat-desc">Turn business KPIs into quests. Earn XP for every milestone. Level up from Commander to Admiral as your revenue grows.</div>
+      <div class="feat-tag">RPG for your business</div>
+    </div>
+    <div class="feat-card reveal" style="--fc:#f472b6">
+      <div class="feat-icon">🧬</div>
+      <div class="feat-title">Full Whitelabel</div>
+      <div class="feat-desc">Your name, your colors, your domain. Every pixel is customizable. Deploy HELIX OS as your own product in under 24 hours.</div>
+      <div class="feat-tag">Resell it as yours</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">PROCESS</div>
+  <h2 class="section-title reveal">Live in 4 steps.</h2>
+  <p class="section-sub reveal">From zero to a fully configured AI command center in minutes.</p>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Configure your OS</div>
+      <div class="step-desc">Name it, pick your industry, select agents and accent color. The wizard builds everything.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Connect your tools</div>
+      <div class="step-desc">Link Shopify, Meta, HubSpot or any of 16+ integrations. One click per tool.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Talk to your agents</div>
+      <div class="step-desc">Give commands in plain language. Each agent responds from its specialty role.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Watch it grow</div>
+      <div class="step-desc">Live metrics, missions, and activity feed show your business evolving in real time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS STRIP -->
+<section id="integrations-strip">
+  <div class="section-label" style="margin-bottom:32px;">WORKS WITH YOUR STACK</div>
+  <div style="overflow:hidden;">
+    <div class="int-scroll" id="int-scroll">
+      <div class="int-pill"><span class="int-pill-icon">🛍️</span>Shopify</div>
+      <div class="int-pill"><span class="int-pill-icon">🛒</span>WooCommerce</div>
+      <div class="int-pill"><span class="int-pill-icon">📣</span>Meta Ads</div>
+      <div class="int-pill"><span class="int-pill-icon">🔍</span>Google Ads</div>
+      <div class="int-pill"><span class="int-pill-icon">🧡</span>HubSpot</div>
+      <div class="int-pill"><span class="int-pill-icon">☁️</span>Salesforce</div>
+      <div class="int-pill"><span class="int-pill-icon">📝</span>Notion</div>
+      <div class="int-pill"><span class="int-pill-icon">💬</span>Slack</div>
+      <div class="int-pill"><span class="int-pill-icon">📧</span>Gmail</div>
+      <div class="int-pill"><span class="int-pill-icon">💳</span>Stripe</div>
+      <div class="int-pill"><span class="int-pill-icon">⚡</span>Zapier</div>
+      <div class="int-pill"><span class="int-pill-icon">💚</span>WhatsApp</div>
+      <div class="int-pill"><span class="int-pill-icon">📊</span>Google Analytics</div>
+      <div class="int-pill"><span class="int-pill-icon">🗂️</span>Airtable</div>
+      <div class="int-pill"><span class="int-pill-icon">📒</span>QuickBooks</div>
+      <div class="int-pill"><span class="int-pill-icon">📱</span>Twilio</div>
+      <!-- duplicate for infinite scroll -->
+      <div class="int-pill"><span class="int-pill-icon">🛍️</span>Shopify</div>
+      <div class="int-pill"><span class="int-pill-icon">🛒</span>WooCommerce</div>
+      <div class="int-pill"><span class="int-pill-icon">📣</span>Meta Ads</div>
+      <div class="int-pill"><span class="int-pill-icon">🔍</span>Google Ads</div>
+      <div class="int-pill"><span class="int-pill-icon">🧡</span>HubSpot</div>
+      <div class="int-pill"><span class="int-pill-icon">☁️</span>Salesforce</div>
+      <div class="int-pill"><span class="int-pill-icon">📝</span>Notion</div>
+      <div class="int-pill"><span class="int-pill-icon">💬</span>Slack</div>
+      <div class="int-pill"><span class="int-pill-icon">📧</span>Gmail</div>
+      <div class="int-pill"><span class="int-pill-icon">💳</span>Stripe</div>
+      <div class="int-pill"><span class="int-pill-icon">⚡</span>Zapier</div>
+      <div class="int-pill"><span class="int-pill-icon">💚</span>WhatsApp</div>
+      <div class="int-pill"><span class="int-pill-icon">📊</span>Google Analytics</div>
+      <div class="int-pill"><span class="int-pill-icon">🗂️</span>Airtable</div>
+      <div class="int-pill"><span class="int-pill-icon">📒</span>QuickBooks</div>
+      <div class="int-pill"><span class="int-pill-icon">📱</span>Twilio</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">PRICING</div>
+  <h2 class="section-title reveal">Simple, transparent pricing.</h2>
+  <p class="section-sub reveal">No hidden fees. Cancel anytime. Upgrade as you grow.</p>
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="plan-name">STARTER</div>
+      <div class="plan-price">$197<span>/mo</span></div>
+      <div class="plan-period">Everything to launch your OS</div>
+      <ul class="plan-features">
+        <li>3 AI agents active</li>
+        <li>2 integrations</li>
+        <li>Command map + missions</li>
+        <li>Token cost calculator</li>
+        <li>$20 AI credits/month included</li>
+        <li class="off">Whitelabel branding</li>
+        <li class="off">Custom domain</li>
+        <li class="off">Priority support</li>
+      </ul>
+      <button class="plan-btn ghost" onclick="openModal('starter')">GET STARTED</button>
+    </div>
+    <div class="price-card featured reveal">
+      <div class="plan-name">GROWTH</div>
+      <div class="plan-price">$497<span>/mo</span></div>
+      <div class="plan-period">For serious operators</div>
+      <ul class="plan-features">
+        <li>8 AI agents active</li>
+        <li>5 integrations</li>
+        <li>Full command map + gamification</li>
+        <li>Token cost calculator</li>
+        <li>$60 AI credits/month included</li>
+        <li>Whitelabel branding</li>
+        <li class="off">Custom domain</li>
+        <li class="off">Priority support</li>
+      </ul>
+      <button class="plan-btn primary" onclick="openModal('growth')">START GROWTH</button>
+    </div>
+    <div class="price-card reveal">
+      <div class="plan-name">SCALE</div>
+      <div class="plan-price">$997<span>/mo</span></div>
+      <div class="plan-period">Full whitelabel deployment</div>
+      <ul class="plan-features">
+        <li>Unlimited AI agents</li>
+        <li>All 16+ integrations</li>
+        <li>Full command map + gamification</li>
+        <li>Token cost calculator</li>
+        <li>$150 AI credits/month included</li>
+        <li>Full whitelabel branding</li>
+        <li>Custom domain (your.domain.com)</li>
+        <li>Priority support + onboarding call</li>
+      </ul>
+      <button class="plan-btn ghost" onclick="openModal('scale')">GO SCALE</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-label">EARLY USERS</div>
+  <h2 class="section-title reveal">They switched. They stayed.</h2>
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"I went from spending 4 hours a day on research and emails to maybe 30 minutes. NOVA and CIPHER handle everything. It genuinely feels like having a team."</div>
+      <div class="testi-author"><div class="testi-av">🧑</div><div><div class="testi-name">Marcus R.</div><div class="testi-role">POD Store Owner · $12k/mo</div></div></div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"We white-labeled it for 3 of our agency clients in the first week. Each one thought we built it from scratch. ROI in under 10 days."</div>
+      <div class="testi-author"><div class="testi-av">👩</div><div><div class="testi-name">Sofia M.</div><div class="testi-role">Agency Founder · 8 clients</div></div></div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"The token calculator alone saved us. We know exactly what every AI task costs before running it. No surprise bills. Total control."</div>
+      <div class="testi-author"><div class="testi-av">🧔</div><div><div class="testi-name">Daniel K.</div><div class="testi-role">SaaS Founder · 420 users</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" style="position:relative;">
+  <div class="cta-glow"></div>
+  <div class="cta-title reveal">Ready to run<br><span style="background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">on autopilot?</span></div>
+  <p class="cta-sub reveal">Join the operators building smarter businesses with HELIX OS.</p>
+  <a class="btn-primary reveal" onclick="openModal('growth')" href="#" style="font-size:15px;padding:18px 48px;">⚡ LAUNCH YOUR OS NOW</a>
+  <div class="cta-note reveal" style="margin-top:20px;">No setup fee · Cancel anytime · Live in under 5 minutes</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">HELIX OS</div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" onclick="openModal('growth')">Get Access</a>
+    <a href="mailto:hello@helixos.ai">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 HELIX OS · Built with Claude AI</div>
+</footer>
+
+<!-- PAYMENT MODAL -->
+<div id="pay-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <div class="modal-logo">HELIX OS</div>
+    <div class="modal-plan" id="modal-plan-name">GROWTH PLAN</div>
+    <div class="modal-price" id="modal-price">$497<span>/month</span></div>
+    <div class="modal-period" id="modal-period">Billed monthly · Cancel anytime</div>
+    <div class="modal-field"><div class="modal-label">Full Name</div><input class="modal-input" placeholder="John Smith" id="m-name"/></div>
+    <div class="modal-field"><div class="modal-label">Email</div><input class="modal-input" type="email" placeholder="you@company.com" id="m-email"/></div>
+    <div class="modal-field"><div class="modal-label">Card Number</div><input class="modal-input" placeholder="4242 4242 4242 4242" id="m-card" maxlength="19" oninput="formatCard(this)"/></div>
+    <div class="modal-row2">
+      <div class="modal-field"><div class="modal-label">Expiry</div><input class="modal-input" placeholder="MM / YY" id="m-exp" maxlength="7" oninput="formatExp(this)"/></div>
+      <div class="modal-field"><div class="modal-label">CVC</div><input class="modal-input" placeholder="123" id="m-cvc" maxlength="3"/></div>
+    </div>
+    <button class="modal-submit" onclick="handlePayment()">⚡ ACTIVATE MY OS</button>
+    <div class="modal-secure">🔒 SECURED BY STRIPE · SSL ENCRYPTED</div>
+    <div class="modal-note" id="modal-note">Includes $60 AI credits/month · 8 agents · 5 integrations</div>
+  </div>
+</div>
+
+<script>
+// ── CANVAS STARS ──
+(function(){
+  const c=document.getElementById('c'),ctx=c.getContext('2d');
+  c.width=window.innerWidth;c.height=window.innerHeight*3;
+  for(let i=0;i<400;i++){
+    ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*1.2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,225,255,${Math.random()*.55+.05})`;ctx.fill();
+  }
+  // nebulas
+  [[.7,.15,500,'rgba(30,50,140,.18)'],[.15,.6,350,'rgba(80,20,140,.12)'],[.5,.85,400,'rgba(0,80,120,.1)']].forEach(([x,y,r,color])=>{
+    const g=ctx.createRadialGradient(c.width*x,c.height*y,0,c.width*x,c.height*y,r);
+    g.addColorStop(0,color);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+  });
+})();
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>40);
+});
+
+// ── REVEAL ON SCROLL ──
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ── MODAL ──
+const PLANS={
+  starter:{name:'STARTER PLAN',price:'$197<span>/month</span>',period:'Billed monthly · Cancel anytime',note:'Includes $20 AI credits/month · 3 agents · 2 integrations'},
+  growth:{name:'GROWTH PLAN',price:'$497<span>/month</span>',period:'Billed monthly · Cancel anytime',note:'Includes $60 AI credits/month · 8 agents · 5 integrations'},
+  scale:{name:'SCALE PLAN',price:'$997<span>/month</span>',period:'Billed monthly · Cancel anytime',note:'Includes $150 AI credits/month · Unlimited agents · All integrations + onboarding call'},
+};
+
+function openModal(plan){
+  const p=PLANS[plan]||PLANS.growth;
+  document.getElementById('modal-plan-name').textContent=p.name;
+  document.getElementById('modal-price').innerHTML=p.price;
+  document.getElementById('modal-period').textContent=p.period;
+  document.getElementById('modal-note').textContent=p.note;
+  document.getElementById('pay-modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('pay-modal').style.display='none';
+  document.body.style.overflow='';
+}
+
+function formatCard(el){
+  let v=el.value.replace(/\D/g,'').slice(0,16);
+  el.value=v.match(/.{1,4}/g)?.join(' ')||v;
+}
+function formatExp(el){
+  let v=el.value.replace(/\D/g,'').slice(0,4);
+  if(v.length>2)v=v.slice(0,2)+' / '+v.slice(2);
+  el.value=v;
+}
+
+function handlePayment(){
+  const name=document.getElementById('m-name').value.trim();
+  const email=document.getElementById('m-email').value.trim();
+  const card=document.getElementById('m-card').value.trim();
+  if(!name||!email||card.length<19){
+    showToast('⚠️ Please fill all fields correctly');return;
+  }
+  const btn=document.querySelector('.modal-submit');
+  btn.textContent='⚡ PROCESSING...';btn.disabled=true;
+  // In production: replace with real Stripe.js integration
+  setTimeout(()=>{
+    closeModal();
+    showToast('🎉 Welcome to HELIX OS! Check your email to get started.');
+    btn.textContent='⚡ ACTIVATE MY OS';btn.disabled=false;
+  },2000);
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:20px;right:20px;background:#0c0e1a;border:1px solid #34d399;border-radius:10px;padding:12px 20px;font-family:JetBrains Mono,monospace;font-size:11px;color:#34d399;box-shadow:0 0 20px rgba(52,211,153,.3);z-index:300;animation:fadeIn .3s ease;max-width:320px;line-height:1.5;';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},4000);
+}
+
+// ── KEYBOARD ESC ──
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// ── ANIMATE HERO NUMBERS ──
+function countUp(el,target,duration=2000,prefix='',suffix=''){
+  let start=0,step=target/60,current=0;
+  const t=setInterval(()=>{
+    current=Math.min(current+step,target);
+    el.textContent=prefix+Math.round(current).toLocaleString()+suffix;
+    if(current>=target)clearInterval(t);
+  },duration/60);
+}
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const nums=document.querySelectorAll('.h-stat-num');
+    ['10','16','3','24'].forEach((v,i)=>{
+      const suffix=['+',' +','×','/7'][i];
+      const n=parseInt(v);
+      if(n>1)countUp(nums[i],n,1500,'',suffix);
+    });
+  },600);
+});
+</script>
+</body>
+</html>
